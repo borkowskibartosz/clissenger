@@ -5,6 +5,5 @@ Python cli messenger project.
 ## Requirements
 
 * Python 3.6+
-* pip
+* pip 
 * PostgreSQL 9.5+
-
