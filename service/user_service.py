@@ -53,3 +53,8 @@ class UserService:
             loaded_user._hashed_password = row[3]
             ret.append(loaded_user)
         return ret
+    
+    @staticmethod
+    def delete_all(cursor):
+        sql = "DELETE FROM users"
+        cursor.execute(sql)

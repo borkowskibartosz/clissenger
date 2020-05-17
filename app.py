@@ -1,9 +1,13 @@
 import argparse
 
 from model.user import User
+from model.message import Message
 from service.user_service import UserService
+from service.message_service import MessageService
 from utils.db import connect_to_db
 
+#add admins
+#add list all messages for authorized user
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -17,6 +21,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--password', help='user password')
     parser.add_argument('-n', '--new-password', help='user new password')
     parser.add_argument('-m', '--email', help='user email')
+    parser.add_argument('-r', '--recipient', help='username of message recipient')
+    parser.add_argument('-msg', '--message', help='message content')
+    parser.add_argument('-s', '--send', help='send message', action='store_true')
     args = parser.parse_args() # parse all arguments
 
     connection = connect_to_db()
@@ -33,7 +40,7 @@ if __name__ == '__main__':
         else:
             print('Username or password invalid')
 
-    if args.add_user == True:
+    if args.add_user == True and args.delete is not True and args.edit is not True:
         user = User()
         user.username = args.username
         user.email = args.email
@@ -47,7 +54,7 @@ if __name__ == '__main__':
         user.email = 'test@test.pl'
         user.set_password('qwerty12', 'testowa-sol')
         user.save(cursor)
-        print('User created')
+        print(user)
 
     if args.list == True:
         print('List all users from database')
@@ -63,10 +70,29 @@ if __name__ == '__main__':
 
     if args.edit == True:
         # Check is username and password authorize user
-        # UserService.login(cursor, args.username, args.password)
-        # If user logged then set new password from args.new_password
-        # user.update(cursor)
-        pass
+        if is_user_logged == True:
+            user = UserService.find_by_username(cursor, args.username)
+            user.set_password(args.new_password, 'testowa-sol')
+            user.update(cursor)
+            print('Password updated')
+        else:
+            print('Username or password invalid')        
+
+    if args.send == True:
+        is_recipient_exist = UserService.find_by_username(cursor, args.recipient)
+        if is_user_logged == True and is_recipient_exist is not None:
+            from_id = UserService.find_by_username(cursor, args.username)
+            to_id = UserService.find_by_username(cursor, args.recipient)
+            message = Message()
+            message.from_user = from_id.id
+            message.to_user = to_id.id
+            message.context = args.message
+            message.save(cursor)
+            print("Message sent.")
+        elif is_user_logged == True and is_recipient_exist is None:
+            print(f'Recipient {args.recipient} doesn\'t exist')
+        else:
+            print('Please login to send a message')
 
     cursor.close()
     connection.close()

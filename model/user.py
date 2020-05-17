@@ -52,6 +52,6 @@ class User(Entity):
         cursor.execute(sql, (self.id,))
         self._id = -1
         return True
-    
+
     def __str__(self):
         return f"ID: {self.id}, username: {self.username}, e-mail: {self.email}"
